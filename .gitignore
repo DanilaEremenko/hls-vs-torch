@@ -1,3 +1,5 @@
 __pycache__
 test_data/*
 last_img.png
+.idea
+*.exe
