@@ -57,14 +57,14 @@ int test()
 	struct timespec t0, t1;
 
 	data_sc input_img[EXPANDED_HEIGHT][EXPANDED_WIDTH];
-	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "test_data/input.txt"))
+	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "../../../../test_data/input.txt"))
 	{
 		printf("Error while reading input matrix\n");
 		return 1;
 	}
 
 	data_sc expected_res[TARGET_HEIGHT][TARGET_WIDTH];
-	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "test_data/res.txt"))
+	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "../../../../test_data/res.txt"))
 	{
 		printf("Error while reading expected matrix\n");
 		return 1;
