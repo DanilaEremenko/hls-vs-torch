@@ -3,3 +3,5 @@ test_data/*
 last_img.png
 .idea
 *.exe
+*.log
+conv_hls/
