@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include <stdio.h>
 #include <math.h>
 #include "conv.h"
@@ -77,17 +78,31 @@ int test()
 	int run_i;
 	int cmp_i;
 
+	double run_measurments[RUNS];
+
 	int mismatches = 0;
 
 	for (run_i = 0; run_i < RUNS; run_i++)
 	{
 
+		if(timespec_get(&t0, TIME_UTC) != TIME_UTC) {
+		     	printf("Error in calling timespec_get\n");
+		     	exit(EXIT_FAILURE);
+		}
 		for (int batch_i = 0; batch_i < BATCH_SIZE; batch_i++)
 		{
 			conv(input_img, actual_res, conv_matrix);
 		}
+		// sleep(1);
+		if(timespec_get(&t1, TIME_UTC) != TIME_UTC) {
+		     	printf("Error in calling timespec_get\n");
+		     	exit(EXIT_FAILURE);
+		}
 
-		
+		double curr_time = ((double)(t1.tv_sec - t0.tv_sec)*1000000000L) + ((double)(t1.tv_nsec - t0.tv_nsec));
+
+		run_measurments[run_i] = curr_time;
+
 		if (assert_matrixes(expected_res, actual_res))
 		{
 			mismatches++;
@@ -101,7 +116,16 @@ int test()
 
 	if (mismatches == 0)
 	{
+		double mean = 0.0;
+		for (run_i = 0; run_i < RUNS; run_i++)
+		{
+			mean += run_measurments[run_i];
+			// printf("mean = %lfms\n", mean);
+		}
+		mean /= RUNS;
 		printf("\n--------TEST PASSED--------\n");
+		printf("mean = %fus\n", mean);
+
 		return 0;
 	}
 	else
