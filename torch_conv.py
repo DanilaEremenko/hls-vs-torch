@@ -58,22 +58,26 @@ def write_tensor_to_file(tensor: torch.Tensor, write_path: Path):
     )
 
 
-batch_size = 16
+batch_size = 1
 
-img_batch = get_batch_from_img(img_path=Path('input_images/boundaries_yum.jpg'), batch_size=batch_size)
+img_batch = get_batch_from_img(img_path=Path('input_images/crowd-crosswalk.jpg'), batch_size=batch_size)
 
 conv_matrix = get_conv_matrix()
+time_sum = 0
+repeat_num = 10
 for device in devices:
     conv_matrix.to(device)
     img_batch = img_batch.to(device)
 
-    start_time = time.time()
-    img_res = conv_matrix(img_batch)
-    end_time = time.time()
-    print(f"device = {device}, image time = {(end_time - start_time) / batch_size}")
+    for rep_i in range(repeat_num):
+        start_time = time.time()
+        img_res = conv_matrix(img_batch)
+        curr_time = time.time() - start_time
+        time_sum += curr_time
+    print(f"device = {device},\t avg time = {'%.2f' % (time_sum / repeat_num * 1e6)} us")
 
 draw_images(
-    imgs=[img_batch[1, 0].type(torch.uint8).cpu(), img_res[1, 0].type(torch.uint8).cpu()],
+    imgs=[img_batch[0, 0].type(torch.uint8).cpu(), img_res[0, 0].type(torch.uint8).cpu()],
     titles=['SRC', 'RES'],
     plt_shape=(1, 2),
     show=False,
