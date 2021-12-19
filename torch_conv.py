@@ -63,12 +63,12 @@ batch_size = 1
 img_batch = get_batch_from_img(img_path=Path('input_images/crowd-crosswalk.jpg'), batch_size=batch_size)
 
 conv_matrix = get_conv_matrix()
-time_sum = 0
 repeat_num = 10
 for device in devices:
     conv_matrix.to(device)
     img_batch = img_batch.to(device)
 
+    time_sum = 0
     for rep_i in range(repeat_num):
         start_time = time.time()
         img_res = conv_matrix(img_batch)
