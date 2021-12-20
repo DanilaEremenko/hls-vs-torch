@@ -18,7 +18,7 @@ add_files -tb ./hls-source/conv_test.c
 open_solution -reset ex_sol0
 
 # The  command to associate the device to the solution1
-set_part {xa7a12tcsg325-1Q}
+set_part {xa7a100tfgg484-2i}
 
 # The  command to associate clock period to the solution1
 create_clock -period 6 -name clk
@@ -28,7 +28,7 @@ set_clock_uncertainty 0.1
 csim_design -clean
 
 # Build the lists of solution's name and target delay
-set solutions {ex_sol1 ex_sol2 ex_sol3 ex_sol4}
+set solutions {sol1 sol2 sol3 sol4}
 set periods {{6} {8} {10} {12}}
 
 # The comamnd to run the loop for the lists
@@ -42,7 +42,7 @@ foreach solution $solutions period $periods {
   set_clock_uncertainty 0.1
 
   # The  command to associate the device to the solution1
-  set_part {xa7a12tcsg325-1Q}
+  set_part {xa7a100tfgg484-2i}
 
   # Insert command to run C simulaiton
   csim_design -clean
@@ -54,3 +54,87 @@ foreach solution $solutions period $periods {
   cosim_design -trace_level all -tool xsim
 
 }
+
+#######################################################################
+#----------------------- pipeline optimization x1 ---------------------
+#######################################################################
+# The command to create the solution named from the list
+open_solution -reset sol21
+
+# The command to associate clock period to the solution from the list
+create_clock -period 8 -name clk
+set_clock_uncertainty 0.1
+
+# The  command to associate the device to the solution1
+set_part {xa7a100tfgg484-2i}
+
+set_directive_pipeline "conv/LOOP_LOCAL_WIDTH"
+
+# The comamnd to Synthesize the design
+csynth_design
+
+# The comamnd to perform C/RTL Cosimmulation
+# cosim_design -trace_level all -tool xsim
+
+#######################################################################
+#----------------------- pipeline optimization x2 ---------------------
+#######################################################################
+# The command to create the solution named from the list
+open_solution -reset sol22
+
+# The command to associate clock period to the solution from the list
+create_clock -period 8 -name clk
+set_clock_uncertainty 0.1
+
+# The  command to associate the device to the solution1
+set_part {xa7a100tfgg484-2i}
+
+set_directive_pipeline "conv/LOOP_LOCAL_HEIGHT"
+
+# The comamnd to Synthesize the design
+csynth_design
+
+# The comamnd to perform C/RTL Cosimmulation
+# cosim_design -trace_level all -tool xsim
+
+#######################################################################
+#----------------------- pipeline optimization x3 ---------------------
+#######################################################################
+# The command to create the solution named from the list
+open_solution -reset sol23
+
+# The command to associate clock period to the solution from the list
+create_clock -period 8 -name clk
+set_clock_uncertainty 0.1
+
+# The  command to associate the device to the solution1
+set_part {xa7a100tfgg484-2i}
+
+set_directive_pipeline "conv/LOOP_GLOBAL_WIDTH"
+
+# The comamnd to Synthesize the design
+csynth_design
+
+# The comamnd to perform C/RTL Cosimmulation
+# cosim_design -trace_level all -tool xsim
+
+#######################################################################
+#----------------------- pipeline optimization x4 ---------------------
+#######################################################################
+# The command to create the solution named from the list
+open_solution -reset sol24
+
+# The command to associate clock period to the solution from the list
+create_clock -period 8 -name clk
+set_clock_uncertainty 0.1
+
+# The  command to associate the device to the solution1
+set_part {xa7a100tfgg484-2i}
+
+set_directive_pipeline "conv/LOOP_GLOBAL_HEIGHT"
+
+# The comamnd to Synthesize the design
+csynth_design
+
+# The comamnd to perform C/RTL Cosimmulation
+# cosim_design -trace_level all -tool xsim
