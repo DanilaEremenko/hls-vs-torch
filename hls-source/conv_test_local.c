@@ -6,6 +6,11 @@
 
 #define RUNS 10
 
+data_sc input_img[EXPANDED_HEIGHT][EXPANDED_WIDTH];
+data_sc expected_res[TARGET_HEIGHT][TARGET_WIDTH];
+data_sc actual_res[TARGET_HEIGHT][TARGET_WIDTH];
+data_sc conv_matrix[CONV_SIZE][CONV_SIZE] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
+
 void print_arr(data_sc *arr, int arr_size)
 {
 	for (int i = 0; i < arr_size; i++)
@@ -56,24 +61,19 @@ int assert_matrixes(data_sc matrix_1[TARGET_HEIGHT][TARGET_WIDTH], data_sc matri
 int test()
 {
 	struct timespec t0, t1;
-
-	data_sc input_img[EXPANDED_HEIGHT][EXPANDED_WIDTH];
+	printf("initializing array\n");
+	
 	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "test_data/input.txt"))
 	{
 		printf("Error while reading input matrix\n");
 		return 1;
 	}
 
-	data_sc expected_res[TARGET_HEIGHT][TARGET_WIDTH];
 	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "test_data/res.txt"))
 	{
 		printf("Error while reading expected matrix\n");
 		return 1;
 	}
-
-	data_sc actual_res[TARGET_HEIGHT][TARGET_WIDTH];
-
-	data_sc conv_matrix[CONV_SIZE][CONV_SIZE] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
 	int run_i;
 	int cmp_i;
@@ -85,21 +85,22 @@ int test()
 	for (run_i = 0; run_i < RUNS; run_i++)
 	{
 
-		if(timespec_get(&t0, TIME_UTC) != TIME_UTC) {
-		     	printf("Error in calling timespec_get\n");
-		     	exit(EXIT_FAILURE);
-		}
-		for (int batch_i = 0; batch_i < BATCH_SIZE; batch_i++)
+		if (timespec_get(&t0, TIME_UTC) != TIME_UTC)
 		{
-			conv(input_img, actual_res, conv_matrix);
-		}
-		// sleep(1);
-		if(timespec_get(&t1, TIME_UTC) != TIME_UTC) {
-		     	printf("Error in calling timespec_get\n");
-		     	exit(EXIT_FAILURE);
+			printf("Error in calling timespec_get\n");
+			exit(EXIT_FAILURE);
 		}
 
-		double curr_time = ((double)(t1.tv_sec - t0.tv_sec)*1000000000L) + ((double)(t1.tv_nsec - t0.tv_nsec));
+		conv(input_img, actual_res, conv_matrix);
+
+		// sleep(1);
+		if (timespec_get(&t1, TIME_UTC) != TIME_UTC)
+		{
+			printf("Error in calling timespec_get\n");
+			exit(EXIT_FAILURE);
+		}
+
+		double curr_time = ((double)(t1.tv_sec - t0.tv_sec) * 1000000L) + ((double)(t1.tv_nsec - t0.tv_nsec) / 1000L);
 
 		run_measurments[run_i] = curr_time;
 

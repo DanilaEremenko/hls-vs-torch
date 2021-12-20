@@ -3,7 +3,12 @@
 #include <math.h>
 #include "conv.h"
 
-#define RUNS 10
+#define RUNS 3
+
+data_sc input_img[EXPANDED_HEIGHT][EXPANDED_WIDTH];
+data_sc expected_res[TARGET_HEIGHT][TARGET_WIDTH];
+data_sc actual_res[TARGET_HEIGHT][TARGET_WIDTH];
+data_sc conv_matrix[CONV_SIZE][CONV_SIZE] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
 void print_arr(data_sc *arr, int arr_size)
 {
@@ -55,24 +60,19 @@ int assert_matrixes(data_sc matrix_1[TARGET_HEIGHT][TARGET_WIDTH], data_sc matri
 int test()
 {
 	struct timespec t0, t1;
-
-	data_sc input_img[EXPANDED_HEIGHT][EXPANDED_WIDTH];
+	printf("initializing array\n");
+	
 	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "../../../../test_data/input.txt"))
 	{
 		printf("Error while reading input matrix\n");
 		return 1;
 	}
 
-	data_sc expected_res[TARGET_HEIGHT][TARGET_WIDTH];
 	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "../../../../test_data/res.txt"))
 	{
 		printf("Error while reading expected matrix\n");
 		return 1;
 	}
-
-	data_sc actual_res[TARGET_HEIGHT][TARGET_WIDTH];
-
-	data_sc conv_matrix[CONV_SIZE][CONV_SIZE] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
 	int run_i;
 	int cmp_i;
@@ -82,12 +82,8 @@ int test()
 	for (run_i = 0; run_i < RUNS; run_i++)
 	{
 
-		for (int batch_i = 0; batch_i < BATCH_SIZE; batch_i++)
-		{
-			conv(input_img, actual_res, conv_matrix);
-		}
+		conv(input_img, actual_res, conv_matrix);
 
-		
 		if (assert_matrixes(expected_res, actual_res))
 		{
 			mismatches++;
