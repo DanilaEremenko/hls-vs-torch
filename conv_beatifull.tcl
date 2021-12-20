@@ -4,13 +4,13 @@
 # https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/
 
 # The command to create new project
-open_project -reset conv_hls
+open_project -reset conv_hls_beatifull
 
 # The  command to specify the top-level function
 set_top conv
 
 # The  command to add design file
-add_files ./hls-source/conv.c
+add_files ./hls-source/conv_beatifull.c
 add_files ./hls-source/conv.h
 
 # The  command to add testbench file
