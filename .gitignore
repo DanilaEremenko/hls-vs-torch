@@ -4,4 +4,4 @@ last_img.png
 .idea
 *.exe
 *.log
-conv_hls/
+conv_hls*
