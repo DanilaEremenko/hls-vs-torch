@@ -6,12 +6,6 @@ import numpy as np
 import cv2
 from plot_part import draw_images
 
-devices = ["cpu", "cuda"]
-dtype = torch.float32
-
-res_dir = Path('test_data')
-res_dir.mkdir(parents=True, exist_ok=True)
-
 
 def get_conv_matrix() -> nn.Conv2d:
     k_size = 3
@@ -58,31 +52,37 @@ def write_tensor_to_file(tensor: torch.Tensor, write_path: Path):
     )
 
 
+# определение вычислительных устройств, для которых будет проведен эксперимент
+devices = ["cpu", "cuda"]
+# определение типа данных, используемого в эксперименте
+dtype = torch.float32
+
+# определение и создание директории, в которую будут сохранены файлы для тестирования собственных реализаций операции свертки
+res_dir = Path('test_data')
+res_dir.mkdir(parents=True, exist_ok=True)
+
 batch_size = 1
 
-img_batch = get_batch_from_img(img_path=Path('input_images/crowd-crosswalk.jpg'), batch_size=batch_size)
+# загрузка исходного изображения из .*jpg файла
+img_batch = get_batch_from_img(img_path=Path('input_images/crowd-crosswalk.jpg'), batch_size=batch_size)  
 
-conv_matrix = get_conv_matrix()
+# инициализация ядра свертки
+conv_matrix = get_conv_matrix() 
 repeat_num = 10
-for device in devices:
-    conv_matrix.to(device)
-    img_batch = img_batch.to(device)
+for device in devices:  # замер времени для всех вычислительных устройств
+    conv_matrix.to(device) # указание вычислительного устройства для матрицы свертки
+    img_batch = img_batch.to(device) # указание вычислительного устройства для матрицы изображения
 
     time_sum = 0
-    for rep_i in range(repeat_num):
+    for rep_i in range(repeat_num): # цикл измерение временных по нескольким запускам
         start_time = time.time()
-        img_res = conv_matrix(img_batch)
+        img_res = conv_matrix(img_batch) # операция свертки
         curr_time = time.time() - start_time
         time_sum += curr_time
-    print(f"device = {device},\t avg time = {'%.2f' % (time_sum / repeat_num * 1e6)} us")
+    print(f"device = {device},\t avg time = {'%.2f' % (time_sum / repeat_num * 1e6)} us") # печать в консоль среднего значения по нескольким запуска в миллисекундах
 
-draw_images(
-    imgs=[img_batch[0, 0].type(torch.uint8).cpu(), img_res[0, 0].type(torch.uint8).cpu()],
-    titles=['SRC', 'RES'],
-    plt_shape=(1, 2),
-    show=False,
-    save_path='last_img.png'
-)
 
-write_tensor_to_file(tensor=img_batch, write_path=Path(f'{res_dir}/input.txt'))
+# запись в файл входного массива
+write_tensor_to_file(tensor=img_batch, write_path=Path(f'{res_dir}/input.txt')) 
+# запись в файл выходного массива
 write_tensor_to_file(tensor=img_res, write_path=Path(f'{res_dir}/res.txt'))

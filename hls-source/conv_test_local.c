@@ -62,14 +62,14 @@ int test()
 {
 	struct timespec t0, t1;
 	printf("initializing array\n");
-	
-	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "test_data/input.txt"))
+
+	if (!readmatrix(EXPANDED_HEIGHT, EXPANDED_WIDTH, &input_img, "test_data/input.txt")) // считывание входного изображения
 	{
 		printf("Error while reading input matrix\n");
 		return 1;
 	}
 
-	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "test_data/res.txt"))
+	if (!readmatrix(TARGET_HEIGHT, TARGET_WIDTH, &expected_res, "test_data/res.txt")) // считывание ожидаемого выходного изображения
 	{
 		printf("Error while reading expected matrix\n");
 		return 1;
@@ -78,13 +78,14 @@ int test()
 	int run_i;
 	int cmp_i;
 
-	double run_measurments[RUNS];
+	double run_measurments[RUNS]; // создание массива для сохранения временных замеров каждого эксперимента и дальнейшего усреднения
 
 	int mismatches = 0;
 
 	for (run_i = 0; run_i < RUNS; run_i++)
 	{
 
+		// время начала работы функции
 		if (timespec_get(&t0, TIME_UTC) != TIME_UTC)
 		{
 			printf("Error in calling timespec_get\n");
@@ -94,16 +95,19 @@ int test()
 		conv(input_img, actual_res, conv_matrix);
 
 		// sleep(1);
+		// время окончания работы функции
 		if (timespec_get(&t1, TIME_UTC) != TIME_UTC)
 		{
 			printf("Error in calling timespec_get\n");
 			exit(EXIT_FAILURE);
 		}
 
+		//вычисление текущего времени работы функции
 		double curr_time = ((double)(t1.tv_sec - t0.tv_sec) * 1000000L) + ((double)(t1.tv_nsec - t0.tv_nsec) / 1000L);
-
+		//сохранение текущего времени работы функции в массив
 		run_measurments[run_i] = curr_time;
 
+		//сравнение полученных результатов с эталонными
 		if (assert_matrixes(expected_res, actual_res))
 		{
 			mismatches++;
@@ -117,6 +121,7 @@ int test()
 
 	if (mismatches == 0)
 	{
+		//расчет и печать средних временных затрат в консоль
 		double mean = 0.0;
 		for (run_i = 0; run_i < RUNS; run_i++)
 		{
