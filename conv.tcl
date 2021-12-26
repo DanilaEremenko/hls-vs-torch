@@ -1,4 +1,4 @@
-# gcc hls-source/conv.* hls-source/conv_test_local.c  -o res.exe
+# gcc hls-source/conv.* hls-source/conv_test_local.c -O3 -o res.exe
 # export PATH="$PATH:/tools/Xilinx/Vivado/2020.1/bin"
 # https://www.xilinx.com/support/documentation/sw_manuals/xilinx2017_4/ug1270-vivado-hls-opt-methodology-guide.pdf
 # https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/
@@ -48,7 +48,7 @@ foreach solution $solutions period $periods {
   set_part {xa7a100tfgg484-2i}
 
   # Insert command to run C simulaiton
-  csim_design -clean
+  # csim_design -clean
 
   # The comamnd to Synthesize the design
   csynth_design
@@ -68,10 +68,10 @@ set_clock_uncertainty 0.1
 
 set_part {xa7a100tfgg484-2i}
 
-set_directive_loop_flatten "conv/LOOP_GLOBAL_HEIGHT"
+set_directive_loop_flatten "conv/L4"
 
 # Insert command to run C simulaiton
-csim_design -clean
+# csim_design -clean
 
 # The comamnd to Synthesize the design
 csynth_design
@@ -83,8 +83,8 @@ csynth_design
 #######################################################################
 #------------------------------ pipeline  -----------------------------
 #######################################################################
-set pl_solutions {sol2_ppl1 sol2_ppl2}
-set pls {conv/LOOP_LOCAL_WIDTH conv/LOOP_LOCAL_HEIGHT}
+set pl_solutions {sol2_ppl4 sol2_ppl3 sol2_ppl2}
+set pls {conv/L4 conv/L3 conv/L2}
 
 # The comamnd to run the loop for the lists
 foreach solution $pl_solutions pl $pls {
@@ -99,7 +99,7 @@ foreach solution $pl_solutions pl $pls {
   set_directive_pipeline "$pl"
   
   # Insert command to run C simulaiton
-  csim_design -clean
+  # csim_design -clean
 
   # The comamnd to Synthesize the design
   csynth_design
@@ -111,10 +111,10 @@ foreach solution $pl_solutions pl $pls {
 
 
 #######################################################################
-#--------------------- flatten + pipeline  ---------------
+#---------------------------- unroll  ---------------------------------
 #######################################################################
-set pl_solutions {sol2_fl_ppl1 sol2_fl_ppl2}
-set pls {conv/LOOP_LOCAL_WIDTH conv/LOOP_LOCAL_HEIGHT}
+set pl_solutions {sol2_unr4 sol2_unr3 sol2_unr2}
+set pls {conv/L4 conv/L3 conv/L2}
 
 # The comamnd to run the loop for the lists
 foreach solution $pl_solutions pl $pls {
@@ -126,11 +126,10 @@ foreach solution $pl_solutions pl $pls {
 
   set_part {xa7a100tfgg484-2i}
 
-  set_directive_loop_flatten "conv/LOOP_GLOBAL_HEIGHT"
-  set_directive_pipeline "$pl"
-  
+  set_directive_unroll -factor 4 "$pl"
+
   # Insert command to run C simulaiton
-  csim_design -clean
+  # csim_design -clean
 
   # The comamnd to Synthesize the design
   csynth_design
@@ -140,76 +139,36 @@ foreach solution $pl_solutions pl $pls {
 
 }
 
-#######################################################################
-#------------------ flatten + pipeline + unroll  ---------
-#######################################################################
-open_solution -reset sol2_fl_ppl2_unr
-
-create_clock -period 8 -name clk
-set_clock_uncertainty 0.1
-
-set_part {xa7a100tfgg484-2i}
-
-set_directive_loop_flatten "conv/LOOP_GLOBAL_HEIGHT"
-set_directive_pipeline "conv/LOOP_LOCAL_HEIGHT"
-set_directive_unroll -factor 4 "conv/LOOP_GLOBAL_HEIGHT"
-
-# Insert command to run C simulaiton
-csim_design -clean
-
-# The comamnd to Synthesize the design
-csynth_design
-
-# The comamnd to perform C/RTL Cosimmulation
-# cosim_design -trace_level all -tool xsim
-
-
 
 #######################################################################
-#-------------- flatten + pipeline  + unroll + fifo  ------------------
+#------------------------------- unroll + part  -----------------------
 #######################################################################
-open_solution -reset sol2_fl_ppl2_unr_fifo
+set pl_solutions {sol2_unr4_fifo sol2_unr3_fifo sol2_unr2_fifo}
+set pls {conv/L4 conv/L3 conv/L2}
 
-create_clock -period 8 -name clk
-set_clock_uncertainty 0.1
+# The comamnd to run the loop for the lists
+foreach solution $pl_solutions pl $pls {
 
-set_part {xa7a100tfgg484-2i}
+  open_solution -reset $solution
 
-set_directive_loop_flatten "conv/LOOP_GLOBAL_HEIGHT"
-set_directive_pipeline "conv/LOOP_LOCAL_HEIGHT"
-set_directive_unroll -factor 4 "conv/LOOP_GLOBAL_HEIGHT"
-set_directive_interface -mode ap_fifo "conv" input_img
+  create_clock -period 8 -name clk
+  set_clock_uncertainty 0.1
 
-# Insert command to run C simulaiton
-csim_design -clean
+  set_part {xa7a100tfgg484-2i}
 
-# The comamnd to Synthesize the design
-csynth_design
-
-# The comamnd to perform C/RTL Cosimmulation
-# cosim_design -trace_level all -tool xsim
+  set_directive_unroll -factor 4 "$pl"
+  set_directive_array_partition -type block -factor 4 "conv" input_img
+  set_directive_array_partition -type complete "conv" conv_matrix
+  set_directive_array_partition -type block -factor 4 "conv" output_img
 
 
-#######################################################################
-#--------------------- flatten + pipeline + unroll + part  ------------
-#######################################################################
-open_solution -reset sol2_fl_ppl2_unr_part
+  # Insert command to run C simulaiton
+  # csim_design -clean
 
-create_clock -period 8 -name clk
-set_clock_uncertainty 0.1
+  # The comamnd to Synthesize the design
+  csynth_design
 
-set_part {xa7a100tfgg484-2i}
+  # The comamnd to perform C/RTL Cosimmulation
+  # cosim_design -trace_level all -tool xsim
 
-set_directive_loop_flatten "conv/LOOP_GLOBAL_HEIGHT"
-set_directive_pipeline "conv/LOOP_LOCAL_HEIGHT"
-set_directive_unroll -factor 4 "conv/LOOP_GLOBAL_HEIGHT"
-set_directive_array_partition -type block -factor 4 "conv" input_img
-
-# Insert command to run C simulaiton
-csim_design -clean
-
-# The comamnd to Synthesize the design
-csynth_design
-
-# The comamnd to perform C/RTL Cosimmulation
-# cosim_design -trace_level all -tool xsim
+}
