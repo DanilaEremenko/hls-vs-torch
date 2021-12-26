@@ -143,7 +143,7 @@ foreach solution $pl_solutions pl $pls {
 #######################################################################
 #------------------------------- unroll + part  -----------------------
 #######################################################################
-set pl_solutions {sol2_unr4_fifo sol2_unr3_fifo sol2_unr2_fifo}
+set pl_solutions {sol2_unr4_part sol2_unr3_part sol2_unr2_part}
 set pls {conv/L4 conv/L3 conv/L2}
 
 # The comamnd to run the loop for the lists
